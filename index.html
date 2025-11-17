@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>@y_in16 さんへの質問箱</title>
+
+<style>
+  :root {
+    --main: #a8e6cf;
+    --accent: #ff8b94;
+    --bg: #fdfdffd9;
+    --text: #333;
+    --shadow: 0 4px 15px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    margin: 0; padding: 20px 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .header {
+    text-align: center;
+    padding: 25px 20px;
+    background: white;
+    border-radius: 20px;
+    margin: 0 15px 25px;
+    box-shadow: var(--shadow);
+  }
+  .header img {
+    width: 85px; height: 85px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--main);
+    box-shadow: 0 2px 8px rgba(168,230,207,0.3);
+  }
+  .header .name {
+    font-size: 21px;
+    font-weight: 700;
+    margin-top: 12px;
+    color: #444;
+  }
+
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 15px;
+  }
+  .card {
+    background: white;
+    padding: 28px;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  label {
+    font-size: 15px;
+    font-weight: 600;
+    color: #555;
+    margin-top: 18px;
+    display: block;
+  }
+  textarea {
+    width: 100%;
+    border: 2px solid #eee;
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 16px;
+    margin-top: 8px;
+    resize: vertical;
+    transition: border 0.3s;
+    font-family: inherit;
+  }
+  textarea:focus {
+    outline: none;
+    border-color: var(--main);
+    box-shadow: 0 0 0 3px rgba(168,230,207,0.2);
+  }
+
+  /* ファイル選択UI（前のHTMLから移植） */
+  .file-area {
+    margin-top: 8px;
+    border: 2px dashed #ddd;
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: #fafafa;
+  }
+  .file-area:hover {
+    border-color: var(--main);
+    background: #f0f8f5;
+  }
+  .file-area.dragover {
+    border-color: var(--main);
+    background: #e8f7f0;
+    transform: scale(1.02);
+  }
+  .file-area p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+  }
+  input[type=file] {
+    display: none;
+  }
+
+  .preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .preview img, .preview video {
+    width: 110px;
+    height: 110px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 2px solid #eee;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+
+  button {
+    width: 100%;
+    background: var(--main);
+    color: #fff;
+    border: none;
+    padding: 15px;
+    border-radius: 14px;
+    font-size: 17px;
+    font-weight: 600;
+    margin-top: 22px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 3px 8px rgba(168,230,207,0.4);
+  }
+  button:hover {
+    background: #8cd9b8;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 12px rgba(168,230,207,0.5);
+  }
+
+  .status {
+    margin-top: 16px;
+    text-align: center;
+    font-size: 15px;
+    min-height: 24px;
+    transition: all 0.4s;
+  }
+  .status.sending { color: var(--accent); font-weight: 600; }
+  .status.success { color: #4caf50; font-weight: 600; }
+  .status.error { color: #e74c3c; font-weight: 500; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in { animation: fadeIn 0.5s ease-out; }
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <img src="https://res.cloudinary.com/dtnrnnuqk/image/upload/v1731689512/y_in16_profile_icon.png" alt="@y_in16">
+  <div class="name">@y_in16 さんへの質問箱</div>
+</div>
+
+<div class="container">
+<div class="card">
+
+  <label>質問内容</label>
+  <textarea id="message" rows="4" placeholder="気になることを何でもどうぞ"></textarea>
+
+  <!-- 前のHTMLのファイル選択UIをここに移植 -->
+  <label>画像・動画（任意・最大5つ）</label>
+  <div class="file-area" id="file-area">
+    <p>ここにファイルをドロップ<br>またはクリックして選択</p>
+    <input type="file" id="files" accept="image/*,video/*" multiple>
+  </div>
+  <div class="preview" id="preview"></div>
+
+  <button id="send">送信する</button>
+  <div class="status" id="status"></div>
+
+</div>
+</div>
+
+<script>
+const CLOUD_NAME = "dtnrnnuqk";
+const UPLOAD_PRESET = "dlthlxfn";
+const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1439995157427785833/S-7t5b2A5CgViVA4T9ydacmekOClHHf7w-89v81n41vzjJ6XlgrboPeGgJSNV1iDUd8A";
+
+const fileArea = document.getElementById("file-area");
+const filesInput = document.getElementById("files");
+const preview = document.getElementById("preview");
+const statusDiv = document.getElementById("status");
+let selectedFiles = [];
+
+// ドラッグ＆ドロップ
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(event => {
+  fileArea.addEventListener(event, e => { e.preventDefault(); e.stopPropagation(); });
+});
+['dragenter', 'dragover'].forEach(event => {
+  fileArea.addEventListener(event, () => fileArea.classList.add('dragover'));
+});
+['dragleave', 'drop'].forEach(event => {
+  fileArea.addEventListener(event, () => fileArea.classList.remove('dragover'));
+});
+fileArea.addEventListener("drop", e => {
+  selectedFiles = Array.from(e.dataTransfer.files).slice(0, 5);
+  renderPreview();
+});
+fileArea.addEventListener("click", () => filesInput.click());
+filesInput.addEventListener("change", e => {
+  selectedFiles = Array.from(e.target.files).slice(0, 5);
+  renderPreview();
+});
+
+function renderPreview() {
+  preview.innerHTML = "";
+  selectedFiles.forEach(file => {
+    const url = URL.createObjectURL(file);
+    const el = file.type.startsWith("image/") ? document.createElement("img") : document.createElement("video");
+    el.src = url;
+    if (el.tagName === "VIDEO") el.controls = true;
+    preview.appendChild(el);
+  });
+}
+
+async function uploadToCloudinary(file) {
+  const url = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`;
+  const fd = new FormData();
+  fd.append("file", file);
+  fd.append("upload_preset", UPLOAD_PRESET);
+  const res = await fetch(url, { method: "POST", body: fd });
+  if (!res.ok) throw new Error("upload");
+  return res.json();
+}
+
+document.getElementById("send").addEventListener("click", async () => {
+  const message = document.getElementById("message").value.trim();
+  if (!message) {
+    statusDiv.innerHTML = '<span class="error fade-in">質問を入力してね</span>';
+    return;
+  }
+
+  statusDiv.textContent = "送信中…";
+  statusDiv.className = "status sending fade-in";
+
+  const resultUrls = [];
+  for (const file of selectedFiles) {
+    try {
+      const result = await uploadToCloudinary(file);
+      resultUrls.push(result.secure_url);
+    } catch {
+      statusDiv.innerHTML = '<span class="error fade-in">ちょっとうまくいかなかった…</span>';
+      return;
+    }
+  }
+
+  const content =
+    `**新しい質問が届きました！**\n` +
+    `**宛先：@y_in16**\n\n` +
+    `**質問内容：**\n${message}\n\n` +
+    (resultUrls.length ? "**添付：**\n" + resultUrls.map(u => `<${u}>`).join("\n") : "");
+
+  try {
+    const res = await fetch(DISCORD_WEBHOOK, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content })
+    });
+    if (!res.ok) throw new Error("send");
+
+    statusDiv.textContent = "届きました！ありがとう！";
+    statusDiv.className = "status success fade-in";
+
+    document.getElementById("message").value = "";
+    filesInput.value = "";
+    preview.innerHTML = "";
+    selectedFiles = [];
+  } catch {
+    statusDiv.innerHTML = '<span class="error fade-in">ちょっとうまくいかなかった…</span>';
+  }
+});
+</script>
+
+</body>
+</html>
